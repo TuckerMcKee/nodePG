@@ -33,4 +33,8 @@ app.use((err, req, res, next) => {
 
 
 module.exports = app;
+<<<<<<< HEAD
 //Testing 2.0
+=======
+//Testing 1.0
+>>>>>>> 7aa4876 (testing 1.0)
