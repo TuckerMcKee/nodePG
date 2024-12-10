@@ -5,14 +5,32 @@ const ExpressError = require("../expressError.js");
 
 router.get("/", async (req,res,next) => {
   try {
-    // const results = await db.query('SELECT * FROM industries AS i JOIN comp_industries AS c ON i.code=c.ind_code');
-    const results = await db.query('SELECT * FROM industries');
-    const compResults = await db.query('SELECT comp_code FROM comp_industries AS c LEFT JOIN industries AS i ON c.ind_code=i.code')
-    return res.json({industries:results.rows,comp_codes:compResults.rows})
+    const results = await db.query('SELECT i.industry,ARRAY_AGG(c.comp_code) AS comp_codes FROM industries AS i INNER JOIN comp_industries AS c ON c.ind_code=i.code GROUP BY i.code')
+    return res.json({industries:results.rows})
   } catch (e) {
     return next(e)
   }
 })
+
+router.post("/", async (req,res,next) => {
+    try {
+        const {code, industry} = req.body;
+        const results = await db.query(`INSERT INTO industries (code,industry) VALUES ($1,$2) RETURNING *`,[code,industry]);
+      return res.json({industry:results.rows[0]})
+    } catch (e) {
+      return next(e)
+    }
+  })
+
+router.post("/comp_industries", async (req,res,next) => {
+    try {
+        const {comp_code, ind_code} = req.body;
+        const results = await db.query(`INSERT INTO comp_industries (comp_code,ind_code) VALUES ($1,$2) RETURNING *`,[comp_code,ind_code]);
+      return res.json({comp_industry:results.rows[0]})
+    } catch (e) {
+      return next(e)
+    }
+  })
 
 
 module.exports = router;
